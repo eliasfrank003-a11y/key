@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0B1220" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <title>Income Split</title>
+
+  <!-- iOS "Add to Home Screen" -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Income Split" />
+
+  <!-- Simple inline icons (no extra files needed) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='28' fill='%230B1220'/%3E%3Ctext x='64' y='80' font-size='64' text-anchor='middle'%3E%F0%9F%92%B6%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230B1220'/%3E%3Ctext x='90' y='118' font-size='96' text-anchor='middle'%3E%F0%9F%92%B6%3C/text%3E%3C/svg%3E" />
+
+  <style>
+    :root{
+      --bg: #0B1220;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.66);
+      --line: rgba(255,255,255,.14);
+      --accent: #6EE7FF;
+      --accent2: #A78BFA;
+      --danger: #FB7185;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{ box-sizing: border-box; }
+    html,body{ height: 100%; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 900px at 10% 0%, rgba(110,231,255,.18), transparent 55%),
+        radial-gradient(1200px 900px at 90% 10%, rgba(167,139,250,.18), transparent 55%),
+        radial-gradient(900px 600px at 30% 110%, rgba(34,211,238,.10), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .wrap{
+      min-height: 100%;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .app{
+      width: 100%;
+      max-width: 520px;
+      margin: 12px 0;
+    }
+    .header{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+    .title{
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .subtitle{
+      font-size: 13px;
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.25;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .section{
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+    .section:first-child{ border-top: none; }
+    .row{
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    label{
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .input{
+      flex: 1;
+      min-width: 210px;
+    }
+    input[type="number"]{
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.20);
+      color: var(--text);
+      padding: 14px 14px;
+      font-size: 18px;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    input[type="number"]::placeholder{ color: rgba(255,255,255,.40); }
+
+    .tog{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+    }
+    .tog span{
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    /* switch */
+    .switch{
+      position: relative;
+      width: 46px;
+      height: 28px;
+      flex: 0 0 46px;
+    }
+    .switch input{ display: none; }
+    .slider{
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      transition: 160ms ease;
+    }
+    .slider:before{
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.92);
+      border-radius: 50%;
+      transition: 160ms ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    }
+    .switch input:checked + .slider{
+      background: rgba(110,231,255,.28);
+      border-color: rgba(110,231,255,.40);
+    }
+    .switch input:checked + .slider:before{
+      transform: translate(18px, -50%);
+      background: rgba(255,255,255,.98);
+    }
+
+    .btns{
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+    button{
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.10);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 14px 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 140ms ease;
+      flex: 1;
+      min-width: 130px;
+    }
+    button.primary{
+      border-color: rgba(110,231,255,.35);
+      background: linear-gradient(180deg, rgba(110,231,255,.28), rgba(110,231,255,.14));
+    }
+    button:active{ transform: translateY(1px); }
+    button:focus{ outline: 2px solid rgba(110,231,255,.35); outline-offset: 2px; }
+    button.ghost{
+      background: rgba(0,0,0,.14);
+    }
+
+    .results{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .pill{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+    }
+    .pill .left{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .badge{
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      flex: 0 0 36px;
+    }
+    .name{
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: .2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .meta{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .right{
+      text-align: right;
+      flex: 0 0 auto;
+    }
+    .amount{
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .pct{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .error{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(251,113,133,.35);
+      background: rgba(251,113,133,.10);
+      color: rgba(255,255,255,.92);
+      display: none;
+    }
+    .footer{
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      max-width: 360px;
+    }
+
+    @media (min-width: 480px){
+      .results{
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="app">
+      <div class="header">
+        <div class="title">Income Split</div>
+        <div class="subtitle">
+          Default: Living 50% · Material 20% · Clothing 20% · Charity 10%
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section">
+          <div class="row">
+            <div class="input">
+              <label for="income">Income (€)</label>
+              <input id="income" inputmode="decimal" type="number" min="0" step="0.01" placeholder="e.g. 100" />
+            </div>
+
+            <div class="tog" title="If off, the charity share is redistributed to the other categories">
+              <label class="switch" aria-label="Toggle charity">
+                <input id="toggleCharity" type="checkbox" checked />
+                <span class="slider"></span>
+              </label>
+              <span>Include charity (10%)</span>
+            </div>
+
+            <div class="btns">
+              <button class="primary" id="splitBtn" type="button">Split</button>
+              <button class="ghost" id="resetBtn" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="error" id="errorBox"></div>
+        </div>
+
+        <div class="section">
+          <label>Result</label>
+          <div class="results" id="results">
+            <div class="pill">
+              <div class="left">
+                <div class="badge">🏠</div>
+                <div>
+                  <div class="name">Living</div>
+                  <div class="meta" id="metaLiving">50%</div>
+                </div>
+              </div>
+              <div class="right">
+                <div class="amount" id="amtLiving">€0.00</div>
+                <div class="pct" id="pctLiving"></div>
+              </div>
+            </div>
+
+            <div class="pill">
+              <div class="left">
+                <div class="badge">💥</div>
+                <div>
+                  <div class="name">Material wishes</div>
+                  <div class="meta" id="metaMaterial">20%</div>
+                </div>
+              </div>
+              <div class="right">
+                <div class="amount" id="amtMaterial">€0.00</div>
+                <div class="pct" id="pctMaterial"></div>
+              </div>
+            </div>
+
+            <div class="pill">
+              <div class="left">
+                <div class="badge">👕</div>
+                <div>
+                  <div class="name">Clothing</div>
+                  <div class="meta" id="metaClothing">20%</div>
+                </div>
+              </div>
+              <div class="right">
+                <div class="amount" id="amtClothing">€0.00</div>
+                <div class="pct" id="pctClothing"></div>
+              </div>
+            </div>
+
+            <div class="pill" id="pillCharity">
+              <div class="left">
+                <div class="badge">❤️</div>
+                <div>
+                  <div class="name">Donations / charity</div>
+                  <div class="meta" id="metaCharity">10%</div>
+                </div>
+              </div>
+              <div class="right">
+                <div class="amount" id="amtCharity">€0.00</div>
+                <div class="pct" id="pctCharity"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="hint">
+            Tip: On iPhone Safari, open your GitHub Pages URL → Share → “Add to Home Screen”.
+          </div>
+          <div class="small" id="roundingNote"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const incomeEl = document.getElementById("income");
+      const toggleCharityEl = document.getElementById("toggleCharity");
+      const splitBtn = document.getElementById("splitBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const errorBox = document.getElementById("errorBox");
+      const roundingNote = document.getElementById("roundingNote");
+
+      const pillCharity = document.getElementById("pillCharity");
+
+      const metaLiving = document.getElementById("metaLiving");
+      const metaMaterial = document.getElementById("metaMaterial");
+      const metaClothing = document.getElementById("metaClothing");
+      const metaCharity = document.getElementById("metaCharity");
+
+      const amtLiving = document.getElementById("amtLiving");
+      const amtMaterial = document.getElementById("amtMaterial");
+      const amtClothing = document.getElementById("amtClothing");
+      const amtCharity = document.getElementById("amtCharity");
+
+      const pctLiving = document.getElementById("pctLiving");
+      const pctMaterial = document.getElementById("pctMaterial");
+      const pctClothing = document.getElementById("pctClothing");
+      const pctCharity = document.getElementById("pctCharity");
+
+      const DEFAULT = {
+        living: 0.50,
+        material: 0.20,
+        clothing: 0.20,
+        charity: 0.10
+      };
+
+      function euro(n) {
+        const v = (Math.round(n * 100) / 100);
+        return "€" + v.toFixed(2);
+      }
+
+      function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.style.display = "block";
+      }
+
+      function clearError() {
+        errorBox.textContent = "";
+        errorBox.style.display = "none";
+      }
+
+      function setMetas(weights) {
+        metaLiving.textContent = Math.round(weights.living * 100) + "%";
+        metaMaterial.textContent = Math.round(weights.material * 100) + "%";
+        metaClothing.textContent = Math.round(weights.clothing * 100) + "%";
+        metaCharity.textContent = Math.round(weights.charity * 100) + "%";
+      }
+
+      function setAmounts(amounts, weights, includeCharity) {
+        amtLiving.textContent = euro(amounts.living);
+        amtMaterial.textContent = euro(amounts.material);
+        amtClothing.textContent = euro(amounts.clothing);
+        amtCharity.textContent = euro(amounts.charity);
+
+        pctLiving.textContent = (weights.living * 100).toFixed(1) + "%";
+        pctMaterial.textContent = (weights.material * 100).toFixed(1) + "%";
+        pctClothing.textContent = (weights.clothing * 100).toFixed(1) + "%";
+        pctCharity.textContent = includeCharity ? (weights.charity * 100).toFixed(1) + "%" : "";
+
+        pillCharity.style.opacity = includeCharity ? "1" : "0.55";
+      }
+
+      function redistributeNoCharity() {
+        const sumNonCharity = DEFAULT.living + DEFAULT.material + DEFAULT.clothing; // 0.90
+        return {
+          living: DEFAULT.living / sumNonCharity,
+          material: DEFAULT.material / sumNonCharity,
+          clothing: DEFAULT.clothing / sumNonCharity,
+          charity: 0
+        };
+      }
+
+      function splitIncome() {
+        clearError();
+        roundingNote.textContent = "";
+
+        const raw = incomeEl.value.trim();
+        const income = Number(raw);
+
+        if (!raw || !Number.isFinite(income)) {
+          showError("Enter a valid income amount.");
+          return;
+        }
+        if (income < 0) {
+          showError("Income cannot be negative.");
+          return;
+        }
+
+        const includeCharity = toggleCharityEl.checked;
+        const weights = includeCharity ? { ...DEFAULT } : redistributeNoCharity();
+        setMetas(weights);
+
+        // cents-safe: compute in cents and distribute, then fix remainder deterministically
+        const totalCents = Math.round(income * 100);
+
+        const categories = [
+          { key: "living", w: weights.living },
+          { key: "material", w: weights.material },
+          { key: "clothing", w: weights.clothing },
+          { key: "charity", w: weights.charity }
+        ].filter(c => includeCharity || c.key !== "charity");
+
+        // initial allocation
+        let allocated = {};
+        let used = 0;
+        let remainders = [];
+
+        for (const c of categories) {
+          const exact = totalCents * c.w;
+          const floor = Math.floor(exact);
+          allocated[c.key] = floor;
+          used += floor;
+          remainders.push({ key: c.key, frac: exact - floor });
+        }
+
+        // distribute leftover cents by largest fractional remainder
+        let leftover = totalCents - used;
+        remainders.sort((a, b) => b.frac - a.frac);
+
+        let i = 0;
+        while (leftover > 0 && remainders.length > 0) {
+          allocated[remainders[i].key] += 1;
+          leftover -= 1;
+          i = (i + 1) % remainders.length;
+        }
+
+        const amounts = {
+          living: (allocated.living || 0) / 100,
+          material: (allocated.material || 0) / 100,
+          clothing: (allocated.clothing || 0) / 100,
+          charity: includeCharity ? (allocated.charity || 0) / 100 : 0
+        };
+
+        setAmounts(amounts, weights, includeCharity);
+
+        const sumShown =
+          Math.round((amounts.living + amounts.material + amounts.clothing + amounts.charity) * 100) / 100;
+
+        if (Math.abs(sumShown - income) > 0.001) {
+          roundingNote.textContent = "Note: tiny rounding difference occurred.";
+        }
+      }
+
+      function resetAll() {
+        clearError();
+        incomeEl.value = "";
+        toggleCharityEl.checked = true;
+
+        setMetas({ ...DEFAULT });
+        setAmounts(
+          { living: 0, material: 0, clothing: 0, charity: 0 },
+          { ...DEFAULT },
+          true
+        );
+        roundingNote.textContent = "";
+        incomeEl.focus();
+      }
+
+      // events
+      splitBtn.addEventListener("click", splitIncome);
+      resetBtn.addEventListener("click", resetAll);
+
+      incomeEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") splitIncome();
+      });
+
+      toggleCharityEl.addEventListener("change", () => {
+        // update displayed percentages immediately
+        const includeCharity = toggleCharityEl.checked;
+        const weights = includeCharity ? { ...DEFAULT } : redistributeNoCharity();
+        setMetas(weights);
+
+        // if there is already an income value, re-split
+        if (incomeEl.value.trim()) splitIncome();
+        else {
+          // keep amounts at zero, but adjust charity visibility
+          setAmounts(
+            { living: 0, material: 0, clothing: 0, charity: 0 },
+            weights,
+            includeCharity
+          );
+        }
+      });
+
+      // initial state
+      setMetas({ ...DEFAULT });
+      setAmounts({ living: 0, material: 0, clothing: 0, charity: 0 }, { ...DEFAULT }, true);
+    })();
+  </script>
+</body>
+</html>
