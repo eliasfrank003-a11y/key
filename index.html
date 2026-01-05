@@ -20,14 +20,9 @@
   <style>
     :root{
       --bg: #0B1220;
-      --card: rgba(255,255,255,.08);
-      --card2: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.66);
       --line: rgba(255,255,255,.14);
-      --accent: #6EE7FF;
-      --accent2: #A78BFA;
-      --danger: #FB7185;
       --shadow: 0 18px 60px rgba(0,0,0,.45);
       --radius: 18px;
     }
@@ -69,12 +64,7 @@
       font-weight: 700;
       letter-spacing: .2px;
     }
-    .subtitle{
-      font-size: 13px;
-      color: var(--muted);
-      text-align: right;
-      line-height: 1.25;
-    }
+
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
       border: 1px solid var(--line);
@@ -276,14 +266,9 @@
       padding: 14px 16px;
       border-top: 1px solid rgba(255,255,255,.10);
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 10px;
       flex-wrap: wrap;
-    }
-    .hint{
-      color: var(--muted);
-      font-size: 12px;
-      max-width: 360px;
     }
 
     @media (min-width: 480px){
@@ -299,9 +284,6 @@
     <div class="app">
       <div class="header">
         <div class="title">Income Split</div>
-        <div class="subtitle">
-          Default: Living 50% · Material 20% · Clothing 20% · Charity 10%
-        </div>
       </div>
 
       <div class="card">
@@ -312,12 +294,12 @@
               <input id="income" inputmode="decimal" type="number" min="0" step="0.01" placeholder="e.g. 100" />
             </div>
 
-            <div class="tog" title="If off, the charity share is redistributed to the other categories">
-              <label class="switch" aria-label="Toggle charity">
-                <input id="toggleCharity" type="checkbox" checked />
+            <div class="tog" title="If off, the donations share is redistributed to the other categories">
+              <label class="switch" aria-label="Toggle donations">
+                <input id="toggleDonations" type="checkbox" checked />
                 <span class="slider"></span>
               </label>
-              <span>Include charity (10%)</span>
+              <span>Include donations (10%)</span>
             </div>
 
             <div class="btns">
@@ -334,7 +316,7 @@
           <div class="results" id="results">
             <div class="pill">
               <div class="left">
-                <div class="badge">🏠</div>
+                <div class="badge">💶</div>
                 <div>
                   <div class="name">Living</div>
                   <div class="meta" id="metaLiving">50%</div>
@@ -362,7 +344,7 @@
 
             <div class="pill">
               <div class="left">
-                <div class="badge">👕</div>
+                <div class="badge">👘</div>
                 <div>
                   <div class="name">Clothing</div>
                   <div class="meta" id="metaClothing">20%</div>
@@ -374,26 +356,23 @@
               </div>
             </div>
 
-            <div class="pill" id="pillCharity">
+            <div class="pill" id="pillDonations">
               <div class="left">
-                <div class="badge">❤️</div>
+                <div class="badge">🎗️</div>
                 <div>
-                  <div class="name">Donations / charity</div>
-                  <div class="meta" id="metaCharity">10%</div>
+                  <div class="name">Donations</div>
+                  <div class="meta" id="metaDonations">10%</div>
                 </div>
               </div>
               <div class="right">
-                <div class="amount" id="amtCharity">€0.00</div>
-                <div class="pct" id="pctCharity"></div>
+                <div class="amount" id="amtDonations">€0.00</div>
+                <div class="pct" id="pctDonations"></div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="footer">
-          <div class="hint">
-            Tip: On iPhone Safari, open your GitHub Pages URL → Share → “Add to Home Screen”.
-          </div>
           <div class="small" id="roundingNote"></div>
         </div>
       </div>
@@ -403,34 +382,34 @@
   <script>
     (function () {
       const incomeEl = document.getElementById("income");
-      const toggleCharityEl = document.getElementById("toggleCharity");
+      const toggleDonationsEl = document.getElementById("toggleDonations");
       const splitBtn = document.getElementById("splitBtn");
       const resetBtn = document.getElementById("resetBtn");
       const errorBox = document.getElementById("errorBox");
       const roundingNote = document.getElementById("roundingNote");
 
-      const pillCharity = document.getElementById("pillCharity");
+      const pillDonations = document.getElementById("pillDonations");
 
       const metaLiving = document.getElementById("metaLiving");
       const metaMaterial = document.getElementById("metaMaterial");
       const metaClothing = document.getElementById("metaClothing");
-      const metaCharity = document.getElementById("metaCharity");
+      const metaDonations = document.getElementById("metaDonations");
 
       const amtLiving = document.getElementById("amtLiving");
       const amtMaterial = document.getElementById("amtMaterial");
       const amtClothing = document.getElementById("amtClothing");
-      const amtCharity = document.getElementById("amtCharity");
+      const amtDonations = document.getElementById("amtDonations");
 
       const pctLiving = document.getElementById("pctLiving");
       const pctMaterial = document.getElementById("pctMaterial");
       const pctClothing = document.getElementById("pctClothing");
-      const pctCharity = document.getElementById("pctCharity");
+      const pctDonations = document.getElementById("pctDonations");
 
       const DEFAULT = {
         living: 0.50,
         material: 0.20,
         clothing: 0.20,
-        charity: 0.10
+        donations: 0.10
       };
 
       function euro(n) {
@@ -452,30 +431,30 @@
         metaLiving.textContent = Math.round(weights.living * 100) + "%";
         metaMaterial.textContent = Math.round(weights.material * 100) + "%";
         metaClothing.textContent = Math.round(weights.clothing * 100) + "%";
-        metaCharity.textContent = Math.round(weights.charity * 100) + "%";
+        metaDonations.textContent = Math.round(weights.donations * 100) + "%";
       }
 
-      function setAmounts(amounts, weights, includeCharity) {
+      function setAmounts(amounts, weights, includeDonations) {
         amtLiving.textContent = euro(amounts.living);
         amtMaterial.textContent = euro(amounts.material);
         amtClothing.textContent = euro(amounts.clothing);
-        amtCharity.textContent = euro(amounts.charity);
+        amtDonations.textContent = euro(amounts.donations);
 
         pctLiving.textContent = (weights.living * 100).toFixed(1) + "%";
         pctMaterial.textContent = (weights.material * 100).toFixed(1) + "%";
         pctClothing.textContent = (weights.clothing * 100).toFixed(1) + "%";
-        pctCharity.textContent = includeCharity ? (weights.charity * 100).toFixed(1) + "%" : "";
+        pctDonations.textContent = includeDonations ? (weights.donations * 100).toFixed(1) + "%" : "";
 
-        pillCharity.style.opacity = includeCharity ? "1" : "0.55";
+        pillDonations.style.opacity = includeDonations ? "1" : "0.55";
       }
 
-      function redistributeNoCharity() {
-        const sumNonCharity = DEFAULT.living + DEFAULT.material + DEFAULT.clothing; // 0.90
+      function redistributeNoDonations() {
+        const sumNon = DEFAULT.living + DEFAULT.material + DEFAULT.clothing; // 0.90
         return {
-          living: DEFAULT.living / sumNonCharity,
-          material: DEFAULT.material / sumNonCharity,
-          clothing: DEFAULT.clothing / sumNonCharity,
-          charity: 0
+          living: DEFAULT.living / sumNon,
+          material: DEFAULT.material / sumNon,
+          clothing: DEFAULT.clothing / sumNon,
+          donations: 0
         };
       }
 
@@ -495,8 +474,8 @@
           return;
         }
 
-        const includeCharity = toggleCharityEl.checked;
-        const weights = includeCharity ? { ...DEFAULT } : redistributeNoCharity();
+        const includeDonations = toggleDonationsEl.checked;
+        const weights = includeDonations ? { ...DEFAULT } : redistributeNoDonations();
         setMetas(weights);
 
         // cents-safe: compute in cents and distribute, then fix remainder deterministically
@@ -506,8 +485,8 @@
           { key: "living", w: weights.living },
           { key: "material", w: weights.material },
           { key: "clothing", w: weights.clothing },
-          { key: "charity", w: weights.charity }
-        ].filter(c => includeCharity || c.key !== "charity");
+          { key: "donations", w: weights.donations }
+        ].filter(c => includeDonations || c.key !== "donations");
 
         // initial allocation
         let allocated = {};
@@ -537,13 +516,13 @@
           living: (allocated.living || 0) / 100,
           material: (allocated.material || 0) / 100,
           clothing: (allocated.clothing || 0) / 100,
-          charity: includeCharity ? (allocated.charity || 0) / 100 : 0
+          donations: includeDonations ? (allocated.donations || 0) / 100 : 0
         };
 
-        setAmounts(amounts, weights, includeCharity);
+        setAmounts(amounts, weights, includeDonations);
 
         const sumShown =
-          Math.round((amounts.living + amounts.material + amounts.clothing + amounts.charity) * 100) / 100;
+          Math.round((amounts.living + amounts.material + amounts.clothing + amounts.donations) * 100) / 100;
 
         if (Math.abs(sumShown - income) > 0.001) {
           roundingNote.textContent = "Note: tiny rounding difference occurred.";
@@ -553,11 +532,11 @@
       function resetAll() {
         clearError();
         incomeEl.value = "";
-        toggleCharityEl.checked = true;
+        toggleDonationsEl.checked = true;
 
         setMetas({ ...DEFAULT });
         setAmounts(
-          { living: 0, material: 0, clothing: 0, charity: 0 },
+          { living: 0, material: 0, clothing: 0, donations: 0 },
           { ...DEFAULT },
           true
         );
@@ -573,27 +552,24 @@
         if (e.key === "Enter") splitIncome();
       });
 
-      toggleCharityEl.addEventListener("change", () => {
-        // update displayed percentages immediately
-        const includeCharity = toggleCharityEl.checked;
-        const weights = includeCharity ? { ...DEFAULT } : redistributeNoCharity();
+      toggleDonationsEl.addEventListener("change", () => {
+        const includeDonations = toggleDonationsEl.checked;
+        const weights = includeDonations ? { ...DEFAULT } : redistributeNoDonations();
         setMetas(weights);
 
-        // if there is already an income value, re-split
         if (incomeEl.value.trim()) splitIncome();
         else {
-          // keep amounts at zero, but adjust charity visibility
           setAmounts(
-            { living: 0, material: 0, clothing: 0, charity: 0 },
+            { living: 0, material: 0, clothing: 0, donations: 0 },
             weights,
-            includeCharity
+            includeDonations
           );
         }
       });
 
       // initial state
       setMetas({ ...DEFAULT });
-      setAmounts({ living: 0, material: 0, clothing: 0, charity: 0 }, { ...DEFAULT }, true);
+      setAmounts({ living: 0, material: 0, clothing: 0, donations: 0 }, { ...DEFAULT }, true);
     })();
   </script>
 </body>
