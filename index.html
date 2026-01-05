@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -262,13 +263,11 @@
       color: rgba(255,255,255,.92);
       display: none;
     }
-    .footer{
-      padding: 14px 16px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-wrap: wrap;
+
+    /* No footer separator line anymore */
+    .rounding-note{
+      margin-top: 10px;
+      text-align: right;
     }
 
     @media (min-width: 480px){
@@ -313,6 +312,7 @@
 
         <div class="section">
           <label>Result</label>
+
           <div class="results" id="results">
             <div class="pill">
               <div class="left">
@@ -370,10 +370,8 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="footer">
-          <div class="small" id="roundingNote"></div>
+          <div class="small rounding-note" id="roundingNote"></div>
         </div>
       </div>
     </div>
@@ -544,7 +542,6 @@
         incomeEl.focus();
       }
 
-      // events
       splitBtn.addEventListener("click", splitIncome);
       resetBtn.addEventListener("click", resetAll);
 
@@ -567,10 +564,10 @@
         }
       });
 
-      // initial state
       setMetas({ ...DEFAULT });
       setAmounts({ living: 0, material: 0, clothing: 0, donations: 0 }, { ...DEFAULT }, true);
     })();
   </script>
 </body>
 </html>
+```
